@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from scripts import scrape
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/assignments/', methods=['GET', 'POST'])
 def get_assignment():
@@ -10,7 +12,7 @@ def get_assignment():
     print(f'username: {username} \n password: {password} ')
     if username and password:
         return jsonify(scrape.main(username, password))
-    return {'result': 'Need both the username and password'}
+    return jsonify({'result': 'Need both the username and password'})
 
 @app.route('/')
 def index():
