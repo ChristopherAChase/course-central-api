@@ -2,6 +2,7 @@
 
 from bs4 import BeautifulSoup
 import mechanicalsoup
+import os
 from base64 import b64decode
 from nacl.secret import SecretBox
 import json
@@ -14,7 +15,9 @@ REMOVE_ATTRIBUTES = [
 
 BASE_URL = 'https://stinet.southeasttech.edu'
 
-SECRET_KEY = '_THIS_IS_MY_32_CHARS_SECRET_KEY_'
+# SECRET_KEY = '_THIS_IS_MY_32_CHARS_SECRET_KEY_'
+
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 def main(username, password):
     encrypted_password = password.split(':')
