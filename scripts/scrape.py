@@ -20,6 +20,7 @@ BASE_URL = 'https://stinet.southeasttech.edu'
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 def main(username, password):
+    return str(SECRET_KEY);
     encrypted_password = password.split(':')
 
     # We decode the two bits independently
