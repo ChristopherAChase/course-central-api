@@ -15,8 +15,6 @@ REMOVE_ATTRIBUTES = [
 
 BASE_URL = 'https://stinet.southeasttech.edu'
 
-# SECRET_KEY = '_THIS_IS_MY_32_CHARS_SECRET_KEY_'
-
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 def main(username, password):
@@ -30,7 +28,7 @@ def main(username, password):
     box = SecretBox(bytes(SECRET_KEY, encoding='utf8'))
     decrypted_password = box.decrypt(encrypted, nonce).decode('utf-8')
 
-    class_data = {}
+    class_data = []
 
     # Create a browser object
     browser = mechanicalsoup.StatefulBrowser()
@@ -126,13 +124,14 @@ def main(username, password):
             all_assignments.append(assignment)
 
         # Add the current class's information and assignments to our class_data object
-        class_data[class_name] = {
+        class_data.append({
+            'name': class_name,
             'link': class_url,
             'assignments': all_assignments
-        }
+        })
 
     # Display the current JSON object
-    return str(class_data)
+    return json.dumps(class_data)
 
 
 if __name__ == '__main__':
