@@ -89,7 +89,7 @@ def main(username, password):
         })
 
     # Display the current JSON object
-    return str(class_data)
+    return class_data
 
 
 if __name__ == '__main__':
