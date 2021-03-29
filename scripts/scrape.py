@@ -54,10 +54,10 @@ def main(username, password):
     for course in courses.find_all('a'):
         class_url_base = f"{BASE_URL}{course['href']}"
         class_name = course.text.replace('  ', ' ')
-        class_url = f"{class_url_base}Coursework.jnz"
         class_grade = scraper.getCurrentGrade(class_url_base, browser)
         class_summary = scraper.getClassInfo(class_url_base, browser)
         # Open the coursework page for current class
+        class_url = f"{class_url_base}Coursework.jnz"
         browser.open(class_url)
         coursework = browser.get_current_page()
 
@@ -72,10 +72,12 @@ def main(username, password):
             assignment = {
                 'name': assignment.find('a').text,
                 'due_date': assignment.find('strong').text,
-                'link': f"{BASE_URL}{assignment.find('a')['href']}",
+                'link': f"{BASE_URL}{assignment.find('a')['href']}"
+            }
+            assignment.update({
                 'instructions': scraper.getAssignmentInstructions(f"{BASE_URL}{assignment.find('a')['href']}", browser),
                 'files': scraper.getAssignmentFiles(f"{BASE_URL}{assignment.find('a')['href']}", browser)
-            }
+            })
 
             all_assignments.append(assignment)
 
