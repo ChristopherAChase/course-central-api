@@ -10,7 +10,7 @@ def get_assignment():
 
     # print(f'username: {username} \n password: {password} ')
     if username and password:
-        return scrape.main(username, password)
+        return jsonify(scrape.main(username, password))
     return {'result': 'Need both the username and password'}
 
 
