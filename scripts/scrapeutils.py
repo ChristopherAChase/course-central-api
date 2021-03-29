@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import mechanicalsoup
 import unicodedata
 
 BASE_URL = 'https://stinet.southeasttech.edu'

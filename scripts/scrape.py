@@ -69,17 +69,17 @@ def main(username, password):
         all_assignments = []
         for assignment in assignments.find_all('div', class_='dueNextAssignment'):
             # Gather information on the coursework page
-            assignment = {
+            assignment_data = {
                 'name': assignment.find('a').text,
                 'due_date': assignment.find('strong').text,
                 'link': f"{BASE_URL}{assignment.find('a')['href']}"
             }
-            assignment.update({
+            assignment_data.update({
                 'instructions': scraper.getAssignmentInstructions(f"{BASE_URL}{assignment.find('a')['href']}", browser),
                 'files': scraper.getAssignmentFiles(f"{BASE_URL}{assignment.find('a')['href']}", browser)
             })
 
-            all_assignments.append(assignment)
+            all_assignments.append(assignment_data)
 
         # Add the current class's information and assignments to our class_data object
         class_data.append({
