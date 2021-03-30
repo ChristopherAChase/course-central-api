@@ -1,21 +1,14 @@
-#!/usr/bin/env python
-
-from bs4 import BeautifulSoup
 import mechanicalsoup
 import os
 from base64 import b64decode
 from nacl.secret import SecretBox
-import json
-
-REMOVE_ATTRIBUTES = [
-    'lang', 'language', 'onmouseover', 'onmouseout', 'script', 'style', 'font',
-    'dir', 'face', 'size', 'color', 'style', 'class', 'width', 'height', 'hspace',
-    'border', 'valign', 'align', 'background', 'bgcolor', 'text', 'link', 'vlink',
-    'alink', 'cellpadding', 'cellspacing']
+from . import scrapeutils as scraper
+import os
 
 BASE_URL = 'https://stinet.southeasttech.edu'
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY', None)
+# SECRET_KEY = 'b10dcd22075319347f196d65e1e61f6a'
 
 def main(username, password):
     encrypted_password = password.split(':')
@@ -59,10 +52,12 @@ def main(username, password):
 
     # Loops through each class in list and gets the name, and the url and adds it to an object
     for course in courses.find_all('a'):
+        class_url_base = f"{BASE_URL}{course['href']}"
         class_name = course.text.replace('  ', ' ')
-        class_url = f"{BASE_URL}{course['href']}Coursework.jnz"
-
+        class_grade = scraper.getCurrentGrade(class_url_base, browser)
+        class_summary = scraper.getClassInfo(class_url_base, browser)
         # Open the coursework page for current class
+        class_url = f"{class_url_base}Coursework.jnz"
         browser.open(class_url)
         coursework = browser.get_current_page()
 
@@ -74,64 +69,29 @@ def main(username, password):
         all_assignments = []
         for assignment in assignments.find_all('div', class_='dueNextAssignment'):
             # Gather information on the coursework page
-            assignment = {
+            assignment_data = {
                 'name': assignment.find('a').text,
                 'due_date': assignment.find('strong').text,
                 'link': f"{BASE_URL}{assignment.find('a')['href']}"
             }
+            assignment_data.update({
+                'instructions': scraper.getAssignmentInstructions(f"{BASE_URL}{assignment.find('a')['href']}", browser),
+                'files': scraper.getAssignmentFiles(f"{BASE_URL}{assignment.find('a')['href']}", browser)
+            })
 
-            # Go to the assignment's specific page
-            browser.open(assignment['link'])
-            assignment_page = browser.get_current_page()
-
-            # Go to the instructions section and gather additional instructions if they exist
-            instructions = assignment_page.find(
-                'div', class_='studentAssignmentInfo').find_all('div', class_='wysiwygtext')
-
-            # Create a beautifulSoup object to store entire children elements
-            instruction_content = BeautifulSoup()
-
-            # Loop through elements that contain instruction content
-            for section in instructions:
-                # Within all elements that contain instruction content, loop through all direct children
-                for child in section.find_all(True, recursive=False):
-                    # remove unicode encoding, and strip text of element to check if element is empty
-                    if ''.join([i if ord(i) < 128 else ' ' for i in child.text]).strip():
-                        # first strip non-empty elements of all attributes and add it to our beautifulSoup object
-                        for attribute in REMOVE_ATTRIBUTES:
-                            del child[attribute]
-                        instruction_content.append(child)
-                # convert all instruction content to a string, and strip of unicode characters, add to our assignment object
-                assignment.update({
-                    'instructions': ''.join([i if ord(i) < 128 else ' ' for i in str(instruction_content)])
-                })
-
-            # Gather file information if it exists
-            files_sect = assignment_page.find('div', class_='fileDisplay')
-            files = []
-            if files_sect:
-                # Look in all of the a tags for the file information
-                for file in files_sect.find_all('a'):
-                    # Grab the file information and add it to our files array
-                    files.append({
-                        'name': file.text,
-                        'url': f"{BASE_URL}{file['href']}"
-                    })
-                # Add our array of file objects and add it to our assignment object
-                assignment.update({'files': files})
-
-            # Add our current assignment's assignment object to our array of all assignments for the current class
-            all_assignments.append(assignment)
+            all_assignments.append(assignment_data)
 
         # Add the current class's information and assignments to our class_data object
         class_data.append({
             'name': class_name,
+            'grade': class_grade,
+            'summary': class_summary,
             'link': class_url,
             'assignments': all_assignments
         })
 
     # Display the current JSON object
-    return json.dumps(class_data)
+    return class_data
 
 
 if __name__ == '__main__':
