@@ -15,8 +15,11 @@ def getClassInfo(class_URL_base, browser):
     info_url = f"{class_URL_base}Main_Page.jnz"
     browser.open(info_url)
     class_info = browser.get_current_page()
-
+    print(info_url)
     # gathers the HTML of the class info section
+    if not class_info.find(class_='pi_About_This_Course'):
+        return 'No Class Summary Available'
+
     class_info_section = class_info.find(class_='pi_About_This_Course') \
         .find(class_='pSection') \
         .find(class_='wysiwygtext') \

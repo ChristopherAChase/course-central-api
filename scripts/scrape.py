@@ -7,10 +7,10 @@ import os
 
 BASE_URL = 'https://stinet.southeasttech.edu'
 
-SECRET_KEY = os.environ.get('SECRET_KEY', None)
-# SECRET_KEY = 'b10dcd22075319347f196d65e1e61f6a'
+# SECRET_KEY = os.environ.get('SECRET_KEY', None)
+SECRET_KEY = 'b10dcd22075319347f196d65e1e61f6a'
 
-def main(username, password):
+def main(username='chais.strand', password='7Y9gxS0JqMUBVMnuDZSpphrHu06SEsLr:HsJ4u+YjlrvdhRcv9zYpX4llltsFeg=='):
     encrypted_password = password.split(':')
 
     # We decode the two bits independently
